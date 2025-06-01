@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Arctic Wild - Complete</title>
+<style>
+  /* ====== Reset and base styles ====== */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #001f3f;
+    color: #eee;
+    transition: background-color 0.4s, color 0.4s;
+    overflow-x: hidden;
+  }
+  body.light {
+    background: #f4f4f4;
+    color: #222;
+  }
+  a {
+    color: #00d1b2;
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+  button {
+    font-family: inherit;
+  }
+
+  /* ====== Loader ====== */
+  #loader {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #001f3f;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #00d1b2;
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  #loader.hidden {
+    display: none;
+  }
+
+  /* ====== Scroll Progress Bar ====== */
+  #progressBar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 5px;
+    background: #00d1b2;
+    width: 0%;
+    z-index: 10000;
+  }
+
+  /* ====== Navbar ====== */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(8px);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+  }
+  nav.light {
+    background: rgba(255,255,255,0.85);
+    color: #222;
+  }
+  nav .logo {
+    font-weight: 900;
+    font-size: 1.5rem;
+  }
+  nav button#darkModeToggle {
+    background: #00d1b2;
+    border: none;
+    padding: 0.5rem 1rem;
+    color: #001f3f;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  nav.light button#darkModeToggle {
+    background: #005f50;
+    color: #f4f4f4;
+  }
+
+  /* ====== Hero Section ====== */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    background: url('https://images.unsplash.com/photo-1549924231-f129b911e442?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+    height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #eee;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  body.light .hero {
+    color: #222;
+  }
+  .hero-text {
+    position: relative;
+    z-index: 2;
+    background: rgba(0,0,0,0.4);
+    border-radius: 6px;
+  }
+  #particleCanvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ====== Video Modal ====== */
+  #videoModal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+  }
+  #videoModal.active {
+    display: flex;
+  }
+  #videoModal video {
+    max-width: 90vw;
+    max-height: 80vh;
+    border-radius: 8px;
+    box-shadow: 0 0 20px #00d1b2;
+  }
+  #videoModal button.closeVideo {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #00d1b2;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-weight: bold;
+    color: #001f3f;
+    cursor: pointer;
+    border-radius: 4px;
+    z-index: 2100;
+  }
+
+  /* ====== Gallery Section ====== */
+  #gallery {
+    padding: 3rem 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  #gallery h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+    gap: 1rem;
+  }
+  .gallery-grid img {
+    width: 100%;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+  .gallery-grid img:hover {
+    transform: scale(1.05);
+  }
+  /* Gallery Modal */
+  #galleryModal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.9);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+  }
+  #galleryModal.active {
+    display: flex;
+  }
+  #galleryModal img {
+    max-width: 90vw;
+    max-height: 80vh;
+    border-radius: 8px;
+  }
+  #galleryModal button.closeGallery {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #00d1b2;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-weight: bold;
+    color: #001f3f;
+    cursor: pointer;
+    border-radius: 4px;
+    z-index: 3100;
+  }
+
+  /* ====== Info Cards Section ====== */
+  #infoCards {
+    max-width: 1100px;
+    margin: 3rem auto;
+    padding: 0 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+  }
+  .info-card {
+    background: #013a74;
+    padding: 1.5rem;
+    border-radius: 10px;
+    flex: 1 1 280px;
+    color: #eee;
+    box-shadow: 0 0 10px #00d1b2;
+    transition: transform 0.3s ease;
+  }
+  body.light .info-card {
+    background: #d0e3f7;
+    color: #222;
+    box-shadow: none;
+  }
+  .info-card:hover {
+    transform: translateY(-5px);
+  }
+  .info-card h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  /* ====== Tours Section (Accordion + Cards) ====== */
+  #tours {
+    max-width: 900px;
+    margin: 3rem auto;
+    padding: 0 1rem;
+  }
+  #tours h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .accordion {
+    background: #012f5b;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+  }
+  body.light .accordion {
+    background: #e0e8f9;
+  }
+  .accordion-header {
+    cursor: pointer;
+    padding: 1rem;
+    font-weight: 700;
+    user-select: none;
+    border-radius: 8px;
+  }
+  .accordion-header:hover {
+    background: #00d1b2;
+    color: #001f3f;
+  }
+  .accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    padding: 0 1rem;
+  }
+  .accordion-content.open {
+    max-height: 300px;
+    padding: 1rem;
+  }
+  .accordion-content ul {
+    padding-left: 1.25rem;
+  }
+  .accordion-content ul li {
+    margin-bottom: 0.5rem;
+  }
+
+  /* ====== Snowfall Animation (overlay) ====== */
+  #snowfallCanvas {
+    pointer-events: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+  }
+
+  /* ====== Testimonials Section ====== */
+  #testimonials {
+    background: #013a74;
+    color: #ddd;
+    padding: 3rem 1rem;
+    max-width: 800px;
+    margin: 3rem auto;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  body.light #testimonials {
+    background: #d0e3f7;
+    color: #222;
+  }
+  #testimonials h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .testimonial-slide {
+    display: none;
+    text-align: center;
+    font-style: italic;
+  }
+  .testimonial-slide.active {
+    display: block;
+    animation: fadeInSlide 1s ease forwards;
+  }
+  @keyframes fadeInSlide {
+    from {
+      opacity: 0;
+      transform: translateX(50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  .testimonial-slide p {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  .testimonial-slide strong {
+    display: block;
+    font-weight: 700;
+    margin-top: 0.5rem;
+    font-size: 1rem;
+    color: #00d1b2;
+  }
+  #testimonials-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  #testimonials-controls button {
+    background: #00d1b2;
+    border: none;
+    padding: 0.5rem 1rem;
+    color: #001f3f;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  #testimonials-controls button:disabled {
+    background: #004f3a;
+    cursor: default;
+  }
+
+  /* ====== Contact Section ====== */
+  #contact {
+    background: #001f3f;
+    padding: 3rem 1rem;
+    max-width: 600px;
+    margin: 3rem auto;
+    border-radius: 10px;
+    box-shadow: 0 0 15px #00d1b2;
+  }
+  body.light #contact {
+    background: #f4f4f4;
+    color: #222;
+    box-shadow: 0 0 15px #005f50;
+  }
+  #contact h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+  label {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  input, textarea {
+    margin-bottom: 1rem;
+    padding: 0.6rem;
+    border-radius: 5px;
+    border: none;
+    font-size: 1rem;
+  }
+  input:focus, textarea:focus {
+    outline: 2px solid #00d1b2;
+  }
+  textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+  button[type="submit"] {
+    background: #00d1b2;
+    color: #001f3f;
+    border: none;
+    padding: 0.75rem 1.2rem;
+    font-weight: 700;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  button[type="submit"]:hover {
+    background: #00997f;
+  }
+  #formMessage {
+    margin-top: 1rem;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  /* ====== Footer ====== */
+  footer {
+    background: #000c1a;
+    color: #666;
+    text-align: center;
+    padding: 1rem;
+    margin-top: 4rem;
+    font-size: 0.9rem;
+  }
+  body.light footer {
+    background: #c0d6e4;
+    color: #333;
+  }
+  footer a {
+    color: #00d1b2;
+  }
+
+  /* ====== Responsive ====== */
+  @media (max-width: 600px) {
+    nav {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    #infoCards {
+      flex-direction: column;
+      padding: 0 0.5rem;
+    }
+  }
+  /* Arctic History Chapter Styles */
+#arcticHistory {
+  max-width: 1100px;
+  margin: 3rem auto;
+  padding: 0 1rem 2rem 1rem;
+}
+#arcticHistory h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #00d1b2;
+}
+.history-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+.history-card {
+  background: #012f5b;
+  color: #eee;
+  padding: 1.5rem;
+  border-radius: 10px;
+  flex: 1 1 280px;
+  min-width: 250px;
+  max-width: 350px;
+  box-shadow: 0 0 10px #00d1b2;
+  transition: transform 0.3s;
+}
+body.light .history-card {
+  background: #e0e8f9;
+  color: #222;
+  box-shadow: none;
+}
+.history-card:hover {
+  transform: translateY(-5px) scale(1.03);
+}
+.history-card h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+@media (max-width: 700px) {
+  .history-cards {
+    flex-direction: column;
+    align-items: center;
+  }
+  /* Arctic History Card Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+}
+</style>
+</head>
+<body>
+
+<!-- Loader -->
+<div id="loader">Loading The Arctic Wild...</div>
+
+<!-- Scroll Progress Bar -->
+<div id="progressBar"></div>
+
+<!-- Navbar -->
+<nav id="navbar">
+  <div class="logo">The Arctic Wild</div>
+  <button id="darkModeToggle">Dark Mode</button>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero" id="heroSection" tabindex="0" aria-label="Hero section with Arctic landscape and video">
+  <canvas id="particleCanvas"></canvas>
+  
+</section>
+<section id="arcticHistory" aria-label="History of the Arctic">
+  <h2>Arctic History</h2>
+  <div class="info-card" tabindex="0">
+    <h3>Early Exploration</h3>
+    <p>The Arctic has fascinated explorers for centuries, from indigenous peoples to famous expeditions seeking the North Pole.</p>
+  </div>
+  <div class="info-card" tabindex="0">
+    <h3>Modern Discoveries</h3>
+    <p>Recent decades have brought new scientific understanding of the Arctic’s climate, wildlife, and importance to the planet.</p>
+  </div>
+</section>
+<!-- ...existing code... -->
+
+<!-- Gallery Modal -->
+<div id="galleryModal" role="dialog" aria-modal="true" aria-label="Enlarged gallery image modal">
+  <button class="closeGallery" aria-label="Close image modal">Close ✕</button>
+  <img src="" alt="Expanded Arctic photo" />
+</div>
+
+<!-- Arctic History Chapter -->
+<section id="arcticHistory" aria-label="History of the Arctic">
+  <h2>Arctic History</h2>
+  <div class="history-cards">
+    <div class="history-card" tabindex="0">
+      <h3>Early Exploration</h3>
+      <p>Indigenous peoples have lived in the Arctic for thousands of years, adapting to its extreme conditions and developing unique cultures.</p>
+    </div>
+    <div class="history-card" tabindex="0">
+      <h3>Age of Expeditions</h3>
+      <p>European explorers ventured into the Arctic in search of new trade routes and scientific knowledge, facing many dangers and hardships.</p>
+    </div>
+    <div class="history-card" tabindex="0">
+      <h3>Modern Era</h3>
+      <p>Today, the Arctic is a focus of scientific research, environmental conservation, and international cooperation.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Info Cards Section -->
+<!-- ...existing code... -->
+<!-- <div class="hero-text">
+    <h1>Discover The Arctic Wild</h1>
+    <p>Explore stunning landscapes, wildlife, and untamed beauty.</p>
+    <small>(Click anywhere here to watch the intro video)</small>
+  </div> -->
+
+<!-- Video Modal -->
+<div id="videoModal" role="dialog" aria-modal="true" aria-label="Introductory video modal">
+  <button class="closeVideo" aria-label="Close video">Close ✕</button>
+  <video controls preload="auto">
+    <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm" type="video/webm" />
+    Your browser does not support the video tag.
+  </video>
+</div>
+
+<!-- Gallery Section -->
+<section id="gallery" aria-label="Photo gallery of Arctic images">
+  <h2>Photo Gallery</h2>
+  <div class="gallery-grid">
+    <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80" alt="Arctic landscape 1" tabindex="0" />
+    <img src="https://images.unsplash.com/photo-1526045612212-70caf35c14df?auto=format&fit=crop&w=600&q=80" alt="Arctic icebergs" tabindex="0" />
+    <img src="https://images.unsplash.com/photo-1549924231-f129b911e442?auto=format&fit=crop&w=1600&q=80" alt="" tabindex="0" />
+    <img src="https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=600&q=80" alt="Northern lights over Arctic" tabindex="0" />
+  </div>
+</section>
+
+<!-- Gallery Modal -->
+<div id="galleryModal" role="dialog" aria-modal="true" aria-label="Enlarged gallery image modal">
+  <button class="closeGallery" aria-label="Close image modal">Close ✕</button>
+  <img src="" alt="Expanded Arctic photo" />
+</div>
+
+<!-- Info Cards Section -->
+<section id="infoCards" aria-label="Information about Arctic regions and wildlife">
+  <div class="info-card" tabindex="0">
+    <h3>Arctic Regions</h3>
+    <p>The Arctic is a polar region located at the northernmost part of Earth, known for its icy landscapes and tundra.</p>
+  </div>
+  <div class="info-card" tabindex="0">
+    <h3>Wildlife</h3>
+    <p>Home to polar bears, Arctic foxes, seals, and many migratory birds that adapt to the harsh climate.</p>
+  </div>
+  <div class="info-card" tabindex="0">
+    <h3>Climate</h3>
+    <p>Characterized by long, cold winters and short summers with 24-hour daylight in summer and darkness in winter.</p>
+  </div>
+  <div class="info-card" tabindex="0">
+    <h3>Conservation</h3>
+    <p>Efforts are underway globally to preserve the fragile Arctic ecosystem threatened by climate change.</p>
+  </div>
+</section>
+
+<!-- Tours Section (Accordion) -->
+<section id="tours" aria-label="Arctic tours and packages">
+  <h2>Arctic Tours & Packages</h2>
+
+  <div class="accordion" tabindex="0" aria-expanded="false" aria-controls="tours1-content" id="tours1">
+    <div class="accordion-header">B.Tech Arctic Exploration</div>
+    <div class="accordion-content" id="tours1-content" aria-hidden="true">
+      <ul>
+        <li>Glacier trekking and ice climbing</li>
+        <li>Arctic wildlife observation</li>
+        <li>Scientific research workshops</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="accordion" tabindex="0" aria-expanded="false" aria-controls="tours2-content" id="tours2">
+    <div class="accordion-header">MBA Arctic Leadership Camp</div>
+    <div class="accordion-content" id="tours2-content" aria-hidden="true">
+      <ul>
+        <li>Leadership in extreme conditions</li>
+        <li>Climate change policy seminars</li>
+        <li>Team-building activities in Arctic wilderness</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials Section -->
+<section id="testimonials" aria-label="Customer testimonials">
+  <h2>What Our Visitors Say</h2>
+  <div class="testimonial-slide active">
+    <p>"An unforgettable journey through the pristine Arctic wilderness."</p>
+    <strong>- Alex J.</strong>
+  </div>
+  <div class="testimonial-slide">
+    <p>"Breathtaking views and incredible wildlife encounters."</p>
+    <strong>- Maria K.</strong>
+  </div>
+  <div class="testimonial-slide">
+    <p>"The guides were knowledgeable and passionate about conservation."</p>
+    <strong>- Samuel R.</strong>
+  </div>
+  <div id="testimonials-controls" role="group" aria-label="Testimonials navigation">
+    <button id="prevTestimonial" aria-label="Previous testimonial">Prev</button>
+    <button id="nextTestimonial" aria-label="Next testimonial">Next</button>
+  </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact" aria-label="Contact form to reach out">
+  <h2>Contact Us</h2>
+  <form id="contactForm" novalidate>
+    <label for="name">Name *</label>
+    <input type="text" id="name" name="name" required minlength="2" placeholder="Your name" aria-required="true" />
+    
+    <label for="email">Email *</label>
+    <input type="email" id="email" name="email" required placeholder="example@mail.com" aria-required="true" />
+    
+    <label for="message">Message *</label>
+    <textarea id="message" name="message" required minlength="10" placeholder="Your message here" aria-required="true"></textarea>
+    
+    <button type="submit">Send Message</button>
+    <div id="formMessage" role="alert" aria-live="polite"></div>
+  </form>
+</section>
+
+<!-- Footer -->
+<footer>
+  &copy; 2025 The Arctic Wild | Photos from <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer">Unsplash</a> | Videos from <a href="https://interactive-examples.mdn.mozilla.net" target="_blank" rel="noopener noreferrer">MDN</a>
+</footer>
+
+<!-- Snowfall Canvas -->
+<canvas id="snowfallCanvas" aria-hidden="true"></canvas>
+
+<script>
+  // ======= Loader =======
+  window.addEventListener('load', () => {
+    const loader = document.getElementById('loader');
+    loader.classList.add('hidden');
+  });
+
+  // ======= Scroll Progress Bar =======
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrollPercent = (scrollTop / docHeight) * 100;
+    document.getElementById('progressBar').style.width = scrollPercent + '%';
+  });
+
+  // ======= Dark Mode Toggle =======
+  const darkModeToggle = document.getElementById('darkModeToggle');
+  const body = document.body;
+  const nav = document.getElementById('navbar');
+  darkModeToggle.addEventListener('click', () => {
+    body.classList.toggle('light');
+    nav.classList.toggle('light');
+    if(body.classList.contains('light')){
+      darkModeToggle.textContent = 'Light Mode';
+    } else {
+      darkModeToggle.textContent = 'Dark Mode';
+    }
+  });
+
+  // ======= Particle Animation on Hero =======
+  const particleCanvas = document.getElementById('particleCanvas');
+  const pCtx = particleCanvas.getContext('2d');
+  let pWidth, pHeight;
+  function resizeParticleCanvas() {
+    pWidth = particleCanvas.width = particleCanvas.clientWidth;
+    pHeight = particleCanvas.height = particleCanvas.clientHeight;
+  }
+  window.addEventListener('resize', resizeParticleCanvas);
+  resizeParticleCanvas();
+
+  class Particle {
+    constructor() {
+      this.x = Math.random() * pWidth;
+      this.y = Math.random() * pHeight;
+      this.radius = Math.random() * 2 + 1;
+      this.speedX = (Math.random() - 0.5) * 0.5;
+      this.speedY = (Math.random() - 0.5) * 0.5;
+      this.alpha = Math.random() * 0.5 + 0.2;
+    }
+    update() {
+      this.x += this.speedX;
+      this.y += this.speedY;
+      if(this.x < 0 || this.x > pWidth) this.speedX *= -1;
+      if(this.y < 0 || this.y > pHeight) this.speedY *= -1;
+    }
+    draw() {
+      pCtx.beginPath();
+      pCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      pCtx.fillStyle = `rgba(0, 209, 178, ${this.alpha})`;
+      pCtx.fill();
+    }
+  }
+  const particles = [];
+  for(let i=0; i<80; i++) {
+    particles.push(new Particle());
+  }
+  function animateParticles() {
+    pCtx.clearRect(0, 0, pWidth, pHeight);
+    particles.forEach(p => {
+      p.update();
+      p.draw();
+    });
+    requestAnimationFrame(animateParticles);
+  }
+  animateParticles();
+
+  // ======= Hero Video Modal =======
+  const heroSection = document.getElementById('heroSection');
+  const videoModal = document.getElementById('videoModal');
+  const video = videoModal.querySelector('video');
+  const closeVideoBtn = videoModal.querySelector('.closeVideo');
+
+  heroSection.addEventListener('click', () => {
+    videoModal.classList.add('active');
+    video.play();
+  });
+  closeVideoBtn.addEventListener('click', () => {
+    video.pause();
+    video.currentTime = 0;
+    videoModal.classList.remove('active');
+  });
+  // Close modal on Escape key
+  window.addEventListener('keydown', e => {
+    if(e.key === "Escape") {
+      if(videoModal.classList.contains('active')) {
+        video.pause();
+        video.currentTime = 0;
+        videoModal.classList.remove('active');
+      }
+      if(galleryModal.classList.contains('active')){
+        galleryModal.classList.remove('active');
+      }
+    }
+  });
+
+  // ======= Gallery Modal =======
+  const galleryImages = document.querySelectorAll('#gallery .gallery-grid img');
+  const galleryModal = document.getElementById('galleryModal');
+  const galleryModalImg = galleryModal.querySelector('img');
+  const closeGalleryBtn = galleryModal.querySelector('.closeGallery');
+
+  galleryImages.forEach(img => {
+    img.addEventListener('click', () => {
+      galleryModalImg.src = img.src;
+      galleryModalImg.alt = img.alt;
+      galleryModal.classList.add('active');
+    });
+    img.addEventListener('keypress', e => {
+      if(e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        img.click();
+      }
+    });
+  });
+  closeGalleryBtn.addEventListener('click', () => {
+    galleryModal.classList.remove('active');
+  });
+
+  // ======= Accordion for Tours =======
+  const accordions = document.querySelectorAll('#tours .accordion');
+  accordions.forEach(acc => {
+    const header = acc.querySelector('.accordion-header');
+    header.addEventListener('click', () => {
+      const content = acc.querySelector('.accordion-content');
+      const expanded = acc.getAttribute('aria-expanded') === 'true';
+      if(expanded){
+        content.classList.remove('open');
+        acc.setAttribute('aria-expanded', 'false');
+        content.setAttribute('aria-hidden', 'true');
+      } else {
+        // close others
+        accordions.forEach(otherAcc => {
+          if(otherAcc !== acc){
+            otherAcc.querySelector('.accordion-content').classList.remove('open');
+            otherAcc.setAttribute('aria-expanded', 'false');
+            otherAcc.querySelector('.accordion-content').setAttribute('aria-hidden', 'true');
+          }
+        });
+        content.classList.add('open');
+        acc.setAttribute('aria-expanded', 'true');
+        content.setAttribute('aria-hidden', 'false');
+      }
+    });
+    // Keyboard accessibility
+    acc.addEventListener('keypress', e => {
+      if(e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        acc.querySelector('.accordion-header').click();
+      }
+    });
+  });
+
+  // ======= Testimonials Slider =======
+  const testimonialSlides = document.querySelectorAll('.testimonial-slide');
+  let currentTestimonial = 0;
+  const prevBtn = document.getElementById('prevTestimonial');
+  const nextBtn = document.getElementById('nextTestimonial');
+
+  function updateTestimonials() {
+    testimonialSlides.forEach((slide, index) => {
+      slide.classList.toggle('active', index === currentTestimonial);
+    });
+    prevBtn.disabled = currentTestimonial === 0;
+    nextBtn.disabled = currentTestimonial === testimonialSlides.length -1;
+  }
+  prevBtn.addEventListener('click', () => {
+    if(currentTestimonial > 0) {
+      currentTestimonial--;
+      updateTestimonials();
+    }
+  });
+  nextBtn.addEventListener('click', () => {
+    if(currentTestimonial < testimonialSlides.length - 1) {
+      currentTestimonial++;
+      updateTestimonials();
+    }
+  });
+  updateTestimonials();
+
+  // ======= Contact Form Validation & Submission =======
+  const contactForm = document.getElementById('contactForm');
+  const formMessage = document.getElementById('formMessage');
+
+  contactForm.addEventListener('submit', e => {
+    e.preventDefault();
+    formMessage.textContent = '';
+    const name = contactForm.name.value.trim();
+    const email = contactForm.email.value.trim();
+    const message = contactForm.message.value.trim();
+    if(name.length < 2) {
+      formMessage.textContent = 'Please enter a valid name (min 2 characters).';
+      return;
+    }
+    if(!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      formMessage.textContent = 'Please enter a valid email address.';
+      return;
+    }
+    if(message.length < 10) {
+      formMessage.textContent = 'Please enter a message (min 10 characters).';
+      return;
+    }
+    formMessage.textContent = 'Sending...';
+
+    // Simulate sending message
+    setTimeout(() => {
+      formMessage.textContent = 'Thank you for reaching out! We will get back to you soon.';
+      contactForm.reset();
+    }, 1500);
+  });
+
+  // ======= Snowfall Animation =======
+  const snowfallCanvas = document.getElementById('snowfallCanvas');
+  const sCtx = snowfallCanvas.getContext('2d');
+  let sWidth, sHeight;
+  function resizeSnowfallCanvas() {
+    sWidth = snowfallCanvas.width = window.innerWidth;
+    sHeight = snowfallCanvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeSnowfallCanvas);
+  resizeSnowfallCanvas();
+
+  class Snowflake {
+    constructor() {
+      this.x = Math.random() * sWidth;
+      this.y = Math.random() * sHeight;
+      this.radius = Math.random() * 3 + 1;
+      this.speedY = Math.random() * 1 + 0.5;
+      this.speedX = (Math.random() - 0.5) * 0.5;
+      this.alpha = Math.random() * 0.8 + 0.2;
+    }
+    update() {
+      this.y += this.speedY;
+      this.x += this.speedX;
+      if(this.y > sHeight) {
+        this.y = -this.radius;
+        this.x = Math.random() * sWidth;
+      }
+      if(this.x < 0 || this.x > sWidth) {
+        this.speedX *= -1;
+      }
+    }
+    draw() {
+      sCtx.beginPath();
+      sCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      sCtx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+      sCtx.fill();
+    }
+  }
+  const snowflakes = [];
+  for(let i=0; i<150; i++) {
+    snowflakes.push(new Snowflake());
+  }
+  function animateSnowfall() {
+    sCtx.clearRect(0, 0, sWidth, sHeight);
+    snowflakes.forEach(flake => {
+      flake.update();
+      flake.draw();
+    });
+    requestAnimationFrame(animateSnowfall);
+  }
+  animateSnowfall();
+
+</script>
+</body>
+</html>
